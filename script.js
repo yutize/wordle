@@ -1,32 +1,27 @@
-import { checkWordPositions } from "./wordle.js";
 import { addToggleFunction } from "./toggle-dark-mode.js";
 
 const wordleGrid = document.getElementById(`wordle-grid`);
 
-let currentAttempt = 0;
 let currentRow = 0;
 let currentColumn = 0;
 let currentGuess = "";
-let word = ``;
+
+const gameConfig = {
+    rows: 5,
+    cols: 5,
+    word: ``
+};
 
 async function getRandomWord() {
     const response = await fetch(`https://it3049c-hangman.fly.dev`);
     const result = await response.json();
     return result.word;
 }
-(async () => {
-    word = await getRandomWord();
+(async function fetchRandomWord() {
+    let word = await getRandomWord();
+    gameConfig.word = word;
     console.log(word);
 })();
-console.log(word, `test`);
-
-const gameConfig = {
-    rows: 5,
-    cols: 5,
-    word: `HELLO`
-};
-
-console.log(gameConfig.word);
                                                                                                                                                                                                                          
 
 function addCellToGrid(row, col) {
@@ -45,9 +40,7 @@ function createGameGrid() {
 }
 
 function addLetterToBox(letter, row, col) {
-    console.log(`Adding letter ${letter} to row ${row}, col ${col}`);
     const cell = document.getElementById(`${row}-${col}`);
-    console.log(cell);
     if (cell) {
         cell.innerText = letter.toUpperCase();
     } else {
@@ -61,36 +54,20 @@ function isLetter(letter) {
 
 document.addEventListener(`keydown`, async(event) => {
     if (event.key == `Enter`) {
-        console.log(currentAttempt, `one`);
-            // revealAttemptResult();
-            if (currentAttempt >= 5) {
-                endGame();
-            }
+        console.log(gameConfig.word);
+        console.log(currentGuess);
 
-            if (currentColumn !== 4) {
-                console.log(`You did not provide 5 characters`);
-            } else {
-                
-            }
-            if (await isWordValid(currentGuess)) {
-                console.log(`You guessed a correct word!`);
-                currentColumn = 0;
+        if (currentColumn === gameConfig.word.length) 
+        {
+            revealResult()
             currentRow++;
-                return;
-            }
-            if (! await isWordValid(currentGuess)) {
-                console.log(`You guessed an invalid word!`);
-                console.log(currentAttempt, `two`);
-                currentColumn = 0;
-                currentAttempt++;
-                currentGuess = "";
-                return;
-            }
-
+            currentColumn = 0;
+            currentGuess = ``;
+        } 
+        
     }
 
     if (event.key === `Backspace` && currentColumn > 0) {
-        console.log(currentColumn);
             currentColumn--;
             addLetterToBox(``,currentRow ,currentColumn);
             currentGuess = currentGuess.slice(currentColumn, -1);
@@ -106,77 +83,35 @@ document.addEventListener(`keydown`, async(event) => {
             );
             currentColumn++;
             currentGuess += event.key;
-            console.log(`test`, currentColumn);
         }
-        console.log(`test2`, currentColumn);
     }
 });
-
-/* function revealAttemptResult() {
-    const result = checkWord(word, currentGuess);
+export function revealResult() {
+    const result = checkWord(gameConfig.word, currentGuess);
     for (let i = 0; i < result.length; i++) {
-        const cell = document.getElementById(`cell-${currentAttempt}-${i}`);
+        const cell = document.getElementById(`${currentRow}-${i}`);
         if (cell) {
             cell.classList.add(result[i]);
         }
     }
-} */
+}
+
+function checkWord(word, guess) {
+
+
+    const result = [];
+    const minLength = Math.min(word.length, guess.length);
+    for (let i = 0; i < minLength; i++) {
+        if (word[i] === guess[i]) {
+            result.push('correct');
+        } else if (word.includes(guess[i]) && word.indexOf(guess[i]) !== i) {
+            result.push('misplaced');
+        } else {
+            result.push('incorrect');
+        }
+    }
+    return result;
+}
 
 createGameGrid();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 addToggleFunction();
-
-function updateAttemptGrid() {
-    const results = checkWordPositions(gameState.currentGuess, gameConfig.word);
-    results.forEach((result, index) => {
-        const cell = document.getElementById(`${gameState.currentAttempt}-${index}`);
-        cell.classList.add(result);
-    });
-}
-
-async function isWordValid(word) {
-    console.log(word);
-
-    if (word === `hello`) {
-        return true;
-    }
-    //const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`).then((response) => response.json());
-    //return Array.isArray(response) && response.length > 0;
-}

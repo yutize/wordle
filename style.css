@@ -54,19 +54,14 @@ header {
     place-items: center;
 }
 
-.letter.correct {
+.correct {
     background-color: var(--correct-color);
 }
 
-.letter.correct {
-    background-color: var(--correct-color);
-    color: var(--secondary-color);
-}
-
-.letter.wrong {
+.incorrect {
     background-color: var(--wrong-color);
 }
 
-.letter.misplaced {
-    background-color: var(--misplaced-color)
+.misplaced {
+    background-color: var(--misplaced-color);
 }
